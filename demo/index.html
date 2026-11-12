@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-theme="light" data-theme-preference="system">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ThanosFx — WebGL effects for the DOM</title>
+    <meta
+      name="description"
+      content="A zero-dependency TypeScript library for burning, rippling, shredding, shattering and reassembling DOM elements with WebGL."
+    />
+    <meta name="theme-color" content="#f5f5f5" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="ThanosFx" />
+    <meta
+      property="og:description"
+      content="WebGL effects that burn, ripple, shred, shatter and reassemble DOM elements."
+    />
+    <meta property="og:site_name" content="ThanosFx" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <script>
+      (function () {
+        var key = "thanosfx-theme";
+        var preference = "system";
+        try {
+          var stored = localStorage.getItem(key);
+          if (stored === "light" || stored === "dark" || stored === "system") {
+            preference = stored;
+          }
+        } catch (error) {}
+        var systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        var theme =
+          preference === "light" || preference === "dark"
+            ? preference
+            : systemDark
+              ? "dark"
+              : "light";
+        var root = document.documentElement;
+        root.dataset.theme = theme;
+        root.dataset.themePreference = preference;
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) {
+          meta.setAttribute("content", theme === "dark" ? "#0d0d0d" : "#f5f5f5");
+        }
+      })();
+    </script>
+    <link rel="stylesheet" href="/landing/site.css" />
+    <script type="module" src="/landing/main.ts"></script>
+  </head>
+  <body>
+    <div class="page">
+      <header class="site-header">
+        <div class="site-header-top">
+          <div class="identity">
+            <h1><a class="site-title" href="./">ThanosFx</a></h1>
+            <span class="version" data-version>v0.1.0</span>
+          </div>
+          <div class="header-actions">
+            <nav class="icon-links" aria-label="Project links">
+              <a
+                class="icon-button"
+                data-link="github"
+                data-icon="github"
+                href="https://github.com/ehsania/thanosfx"
+                aria-label="GitHub"
+                title="GitHub"
+              ></a>
+            </nav>
+            <button
+              class="theme-cycle icon-button"
+              type="button"
+              data-theme-cycle
+              data-icon="system"
+              aria-label="Theme: System"
+              title="Theme: System"
+            ></button>
+          </div>
+        </div>
+        <p class="tagline">WebGL effects for the DOM, with nothing to install.</p>
+        <p class="reduced-note" data-reduced-note hidden>
+          Reduced motion is on — effects use a short opacity fade.
+        </p>
+      </header>
+
+      <main>
+        <section class="section hero-section" aria-labelledby="hero-title">
+          <div class="hero-copy">
+            <p class="section-kicker">Zero dependencies · WebGL2 · TypeScript</p>
+            <h2 id="hero-title">Make the DOM disappear.</h2>
+            <p class="lede">
+              Capture any element, rasterize it to a texture, and animate it with GPU particles.
+              Burn it, ripple it, shred it, shatter it, pixelate it, or put it back together.
+            </p>
+          </div>
+          <div id="hero-root"></div>
+        </section>
+
+        <section class="section" aria-labelledby="examples-title">
+          <div class="section-head">
+            <p class="section-kicker">Live examples</p>
+            <h2 id="examples-title">Six ways to say goodbye.</h2>
+            <p class="lede">
+              Every card is real DOM. Click it to run the effect, or open the playground to tune the
+              shaders.
+            </p>
+          </div>
+          <div id="bento-root"></div>
+        </section>
+
+        <section class="section" aria-labelledby="quickstart-title">
+          <div class="section-head">
+            <p class="section-kicker">Quick start</p>
+            <h2 id="quickstart-title">One element in, dust out.</h2>
+          </div>
+          <div class="install-block">
+            <div class="code-block">
+              <div class="code-head">
+                <span class="code-filename">terminal</span>
+                <button class="copy-button" type="button" data-copy>Copy</button>
+              </div>
+              <pre class="code-body"><code>npm install thanosfx</code></pre>
+            </div>
+            <div class="code-block">
+              <div class="code-head">
+                <span class="code-filename">app.ts</span>
+                <button class="copy-button" type="button" data-copy>Copy</button>
+              </div>
+              <pre class="code-body"><code>import { burn } from "thanosfx";
+
+const card = document.querySelector&lt;HTMLElement&gt;(".card")!;
+
+burn(card, { duration: 1700 }).promise.then(() =&gt; {
+  console.log("gone");
+});</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" aria-labelledby="features-title">
+          <div class="section-head">
+            <p class="section-kicker">Why it works</p>
+            <h2 id="features-title">Small on purpose.</h2>
+          </div>
+          <div class="feature-grid">
+            <article class="feature">
+              <h3>One texture, many effects</h3>
+              <p>Every effect shares the same capture, overlay and render loop.</p>
+            </article>
+            <article class="feature">
+              <h3>Real DOM, real pixels</h3>
+              <p>Text, borders, gradients and images are captured as they render.</p>
+            </article>
+            <article class="feature">
+              <h3>Zero runtime dependencies</h3>
+              <p>WebGL2 and the browser do the work. No canvas library required.</p>
+            </article>
+            <article class="feature">
+              <h3>Accessible by default</h3>
+              <p>Reduced motion falls back to a short opacity fade.</p>
+            </article>
+          </div>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <span data-version>ThanosFx v0.1.0 · MIT</span>
+        <nav aria-label="Footer links">
+          <a data-link="github" href="https://github.com/ehsania/thanosfx">GitHub</a>
+          <a data-link="npm" href="https://www.npmjs.com/package/thanosfx">npm</a>
+          <a href="https://x.com/4lign" rel="me">X</a>
+          <a href="https://a1ign.top" rel="me">Ali Ehsanfar</a>
+        </nav>
+      </footer>
+    </div>
+    <div id="live-region" class="sr-only" aria-live="polite"></div>
+  </body>
+</html>

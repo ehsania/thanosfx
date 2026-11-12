@@ -1,0 +1,38 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: https://registry.npmjs.org
+
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build:lib
+
+      - id: version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if npm view "thanosfx@$VERSION" version >/dev/null 2>&1; then
+            echo "published=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "published=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - if: steps.version.outputs.published == 'false'
+        run: npm publish --provenance --access public
