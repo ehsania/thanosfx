@@ -211,39 +211,6 @@ export function DeleteCard({ effect }: { effect: EffectName }) {
 
 Reduced motion falls back to a short opacity fade. WebGL2 is required.
 
-## Development
-
-```sh
-npm install
-npm run dev        # demo site at http://localhost:5173/
-npm run build      # library + demo
-npm run build:lib  # library only
-npm run build:demo # demo only
-npm run preview
-npm test
-npm run typecheck
-npm run lint
-npm run format:check
-npm run verify     # format, lint, typecheck and tests together
-```
-
-The `demo/video/` page is a development-only capture harness. It is not part of the production build.
-
-## Deployment
-
-The demo deploys to GitHub Pages on every push to `main` through `.github/workflows/pages.yml`.
-
-- Pages source: **GitHub Actions**
-- Site URL: <https://ehsania.github.io/thanosfx/>
-- Base path: `/thanosfx/` via `VITE_BASE_PATH`
-
-To test the Pages build locally:
-
-```sh
-VITE_BASE_PATH=/thanosfx/ npm run build:demo
-npx vite preview --base /thanosfx/
-```
-
 ## Release
 
 The package publishes to npm from tags that start with `v` through `.github/workflows/release.yml`.
