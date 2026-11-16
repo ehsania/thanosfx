@@ -1,4 +1,4 @@
-import { enhanceInlineSlider } from "../inline-slider";
+import { enhanceInlineSlider } from "./inline-slider";
 
 export function h<K extends keyof HTMLElementTagNameMap>(
   tag: K,
@@ -9,14 +9,6 @@ export function h<K extends keyof HTMLElementTagNameMap>(
   if (className) node.className = className;
   if (text !== undefined) node.textContent = text;
   return node;
-}
-
-export function wait(ms: number): Promise<void> {
-  return new Promise((resolve) => window.setTimeout(resolve, ms));
-}
-
-export function createStage(...classes: string[]): HTMLElement {
-  return h("div", ["stage", ...classes].join(" "));
 }
 
 export interface Segmented<T extends string> {

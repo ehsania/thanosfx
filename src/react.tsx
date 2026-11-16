@@ -1,13 +1,12 @@
 import { useCallback, useEffect, useRef } from "react";
 import type { HTMLAttributes, RefObject } from "react";
 import { playEffect } from "./core/run";
-import type { PlayEffectOptions } from "./core/run";
-import type { EffectHandle, EffectName } from "./core/types";
+import type { EffectHandle, EffectName, EffectOptions } from "./core/types";
 
 export function useThanosFx<T extends HTMLElement>(
   ref: RefObject<T | null>,
   effect: EffectName,
-  options: PlayEffectOptions = {},
+  options: EffectOptions = {},
 ): { play: () => EffectHandle | null; cancel: () => void } {
   const handle = useRef<EffectHandle | null>(null);
 
@@ -27,7 +26,7 @@ export function useThanosFx<T extends HTMLElement>(
 
 export interface ThanosFxProps extends HTMLAttributes<HTMLDivElement> {
   effect: EffectName;
-  options?: PlayEffectOptions;
+  options?: EffectOptions;
   /** Play automatically after the first paint. */
   autoPlay?: boolean;
 }

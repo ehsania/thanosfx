@@ -3,12 +3,7 @@ import { effectFactories } from "./effects";
 import { createTexture } from "./gl";
 import { prefersReducedMotion } from "./math";
 import { resolveEffectOptions } from "./options";
-import type { PresetName } from "./options";
 import type { EffectHandle, EffectName, EffectOptions, Rect, RectLike } from "./types";
-
-export interface PlayEffectOptions extends EffectOptions {
-  preset?: PresetName;
-}
 
 function toRect(input: RectLike): Rect | null {
   if (typeof Element !== "undefined" && input instanceof Element) {
@@ -90,14 +85,13 @@ function fadeOut(target: HTMLElement, remove: boolean, cancelled: () => boolean)
 export function playEffect(
   target: HTMLElement,
   effect: EffectName,
-  options: PlayEffectOptions = {},
+  options: EffectOptions = {},
 ): EffectHandle {
   if (!(target instanceof HTMLElement)) {
     throw new TypeError("playEffect(target, effect): target must be an HTMLElement");
   }
 
-  const { preset = "default", ...rest } = options;
-  const opts = resolveEffectOptions(effect, rest, preset);
+  const opts = resolveEffectOptions(effect, options);
   const dpr = Math.max(1, opts.dpr || Math.min(window.devicePixelRatio || 1, 2));
   const collisionRects = opts.collideWith.map(toRect).filter((rect): rect is Rect => rect !== null);
 
@@ -168,10 +162,6 @@ export function playEffect(
       capture: captured.canvas,
       rect: captured.rect,
       dpr,
-      pointer: {
-        x: Math.min(1, Math.max(0, opts.pointer.x)),
-        y: Math.min(1, Math.max(0, opts.pointer.y)),
-      },
       target,
       options: { ...opts, collideWith: collisionRects },
     };

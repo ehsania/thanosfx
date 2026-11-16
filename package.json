@@ -1,14 +1,14 @@
 {
   "name": "thanosfx",
   "version": "0.1.0",
-  "description": "WebGL effects that burn, ripple, shred, shatter and reassemble DOM elements.",
+  "description": "WebGL burn and assemble effects for the DOM.",
   "license": "MIT",
   "author": "Ali Ehsanfar (https://github.com/ehsania)",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ehsania/thanosfx.git"
   },
-  "homepage": "https://github.com/ehsania/thanosfx#readme",
+  "homepage": "https://ehsania.github.io/thanosfx/",
   "bugs": {
     "url": "https://github.com/ehsania/thanosfx/issues"
   },
@@ -18,14 +18,14 @@
     "effects",
     "burn",
     "dust",
-    "ripple",
-    "shatter",
-    "pixelate",
+    "particles",
+    "assemble",
+    "animation",
     "typescript",
     "zero-dependency"
   ],
   "engines": {
-    "node": ">=18"
+    "node": ">=20.19"
   },
   "publishConfig": {
     "access": "public"
@@ -35,6 +35,8 @@
   "files": [
     "dist",
     "README.md",
+    "llms.txt",
+    "AGENTS.md",
     "LICENSE"
   ],
   "main": "./dist/index.cjs",
@@ -68,13 +70,15 @@
     "build": "npm run typecheck && tsup && vite build",
     "build:lib": "tsup",
     "build:demo": "vite build",
+    "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepublishOnly": "npm test && npm run build:lib"
+    "verify": "npm run format:check && npm run lint && npm run typecheck && npm test",
+    "prepublishOnly": "npm run verify && npm run build:lib"
   },
   "peerDependencies": {
     "react": ">=18"

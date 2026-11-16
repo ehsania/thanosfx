@@ -1,48 +1,32 @@
 import { playEffect } from "./core/run";
-import type { PlayEffectOptions } from "./core/run";
-import type { EffectHandle, EffectName } from "./core/types";
+import type { EffectHandle, EffectName, EffectOptions } from "./core/types";
 
 export { playEffect } from "./core/run";
-export type { PlayEffectOptions } from "./core/run";
-export { effectDefaults, presetNames, presets, resolveEffectOptions } from "./core/options";
-export type { PresetName } from "./core/options";
-export { effectFactories } from "./core/effects";
-export { easeInOutCubic, easeOutCubic, easeOutExpo, lerp, clamp01 } from "./core/math";
+export { effectDefaults, resolveEffectOptions } from "./core/options";
 export type {
-  EffectFrame,
+  AttractorLike,
   EffectHandle,
-  EffectInstance,
   EffectName,
   EffectOptions,
+  Point,
   Rect,
   RectLike,
 } from "./core/types";
 
-export const effectNames: EffectName[] = [
-  "burn",
-  "assemble",
-  "ripple",
-  "shred",
-  "shatter",
-  "pixelate",
-];
+export const effectNames: readonly EffectName[] = ["burn", "assemble"];
 
 function makeEffect(name: EffectName) {
-  return (target: HTMLElement, options: PlayEffectOptions = {}): EffectHandle =>
+  return (target: HTMLElement, options: EffectOptions = {}): EffectHandle =>
     playEffect(target, name, options);
 }
 
 export const burn = makeEffect("burn");
 export const assemble = makeEffect("assemble");
-export const ripple = makeEffect("ripple");
-export const shred = makeEffect("shred");
-export const shatter = makeEffect("shatter");
-export const pixelate = makeEffect("pixelate");
 
 export function createEffect(
   target: HTMLElement,
   effect: EffectName,
-  options: PlayEffectOptions = {},
+  options: EffectOptions = {},
 ): EffectHandle {
   return playEffect(target, effect, options);
 }

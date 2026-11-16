@@ -1,5 +1,5 @@
 /*
- * Inline slider — shared by the playground and the landing examples.
+ * Inline slider — used by the effect tuner.
  *
  * The native range input remains the interaction layer; everything below
  * draws over it. All colour is derived from the control's text colour, so

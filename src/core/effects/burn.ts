@@ -1,4 +1,6 @@
+import { resolveAttractor } from "../attractor";
 import { linkProgram, QuadProgram } from "../gl";
+import { clamp01 } from "../math";
 import type { EffectFrame, EffectInstance, Rect, RectLike } from "../types";
 
 const BURN_FRAGMENT = `#version 300 es
@@ -63,6 +65,11 @@ uniform float u_cell;
 uniform float u_pscale;
 uniform float u_spread;
 uniform float u_lift;
+uniform float u_attractOn;
+uniform vec2 u_attract;
+uniform float u_attractRadius;
+uniform float u_attractStrength;
+uniform float u_attractSwirl;
 const int MAX_RECTS = 6;
 uniform vec4 u_rects[MAX_RECTS];
 out float v_alpha;
@@ -156,11 +163,33 @@ void main() {
   float vx = (a_uv.x - 0.5) * u_spread + (r1 - 0.5) * u_spread * 1.5;
   float vy = -u_lift * (0.35 + 0.75 * r2);
   vec2 pos = simulate(p0, vec2(vx, vy), lt);
+  float life = u_life * (0.55 + 0.6 * r3);
+  if (u_attractOn > 0.5) {
+    // The magnet completes before the particle dies, so the dust still gathers
+    // in the target. The shared fade below keeps the sprites as fine and airy
+    // as the collision/none modes instead of holding them at full size.
+    float absorbStart = life * 0.58;
+    float pullStart = min(
+      mix(0.72, 0.04, clamp(u_attractStrength, 0.0, 1.0)) * life,
+      absorbStart * 0.82
+    );
+    float magnet = smoothstep(pullStart, absorbStart, lt);
+    vec2 rel = u_attract - pos;
+    float dist = max(length(rel), 0.0001);
+    vec2 dir = rel / dist;
+    vec2 perp = vec2(-dir.y, dir.x);
+    float arcT = clamp(magnet / 0.7, 0.0, 1.0);
+    float arc = sin(arcT * 3.14159265) * min(dist, 140.0) * u_attractSwirl;
+    float jitter = u_attractRadius * magnet * (0.15 + 0.85 * r4);
+    vec2 finalOffset = vec2(cos(r1 * 6.2831853), sin(r1 * 6.2831853)) * jitter;
+    float converge = 1.0 - pow(1.0 - magnet, 2.0);
+    pos = mix(pos, u_attract, converge) + perp * arc + finalOffset;
+  }
+  float fade = clamp(1.0 - lt / life, 0.0, 1.0);
+  fade *= smoothstep(0.0, 0.12 * life, lt);
+  fade = fade * fade;
   vec2 clip = vec2(pos.x / u_res.x * 2.0 - 1.0, 1.0 - pos.y / u_res.y * 2.0);
   gl_Position = vec4(clip, 0.0, 1.0);
-  float life = u_life * (0.55 + 0.6 * r3);
-  float fade = clamp(1.0 - lt / life, 0.0, 1.0);
-  fade = fade * fade;
   gl_PointSize = max(1.0, u_cell * u_dpr * u_pscale * (0.5 + 0.5 * fade));
   float emberMask = step(0.84, r4);
   float glow = emberMask * clamp(1.0 - lt / 0.22, 0.0, 1.0);
@@ -240,6 +269,8 @@ export function createBurnEffect(frame: EffectFrame, reverse = false): EffectIns
   const particleProgram = linkProgram(gl, PARTICLE_VERTEX, PARTICLE_FRAGMENT);
   const particleUv = gl.getAttribLocation(particleProgram, "a_uv");
   const particleRects = resolveRects(frame);
+  const attractor = resolveAttractor(options.attractTo);
+  const attractStrength = clamp01(options.attractStrength);
   const uvBuffer = makeUVBuffer(
     gl,
     frame.capture.width / frame.dpr,
@@ -296,6 +327,18 @@ export function createBurnEffect(frame: EffectFrame, reverse = false): EffectIns
     gl.uniform1f(gl.getUniformLocation(particleProgram, "u_pscale"), options.particleScale);
     gl.uniform1f(gl.getUniformLocation(particleProgram, "u_spread"), options.spread);
     gl.uniform1f(gl.getUniformLocation(particleProgram, "u_lift"), options.lift);
+    gl.uniform1f(gl.getUniformLocation(particleProgram, "u_attractOn"), attractor ? 1 : 0);
+    gl.uniform2f(
+      gl.getUniformLocation(particleProgram, "u_attract"),
+      (attractor?.x ?? 0) * frame.dpr,
+      (attractor?.y ?? 0) * frame.dpr,
+    );
+    gl.uniform1f(
+      gl.getUniformLocation(particleProgram, "u_attractRadius"),
+      (attractor?.radius ?? 0) * frame.dpr,
+    );
+    gl.uniform1f(gl.getUniformLocation(particleProgram, "u_attractStrength"), attractStrength);
+    gl.uniform1f(gl.getUniformLocation(particleProgram, "u_attractSwirl"), options.attractSwirl);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, frame.texture);
   }

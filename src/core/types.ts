@@ -1,4 +1,4 @@
-export type EffectName = "burn" | "assemble" | "ripple" | "shred" | "shatter" | "pixelate";
+export type EffectName = "burn" | "assemble";
 
 export interface Rect {
   x: number;
@@ -7,12 +7,20 @@ export interface Rect {
   height: number;
 }
 
+export interface Point {
+  x: number;
+  y: number;
+}
+
 export type RectLike =
   | Rect
   | DOMRect
   | Element
   | [number, number, number, number]
   | { left: number; top: number; width: number; height: number };
+
+/** A screen point, rect, rect-like object, or element used as a dust attractor. */
+export type AttractorLike = RectLike | Point | [number, number];
 
 export interface EffectOptions {
   /** Total animation time in milliseconds. */
@@ -23,8 +31,6 @@ export interface EffectOptions {
   dpr?: number;
   /** "auto" honors prefers-reduced-motion; "allow" forces the full effect. */
   reducedMotion?: "auto" | "allow" | "reduce";
-  /** Normalized pointer origin inside the target, used by ripple. */
-  pointer?: { x: number; y: number };
 
   // Burn / assemble
   burnMs?: number;
@@ -40,27 +46,12 @@ export interface EffectOptions {
   collision?: boolean;
   mode?: "sweep" | "instant";
   collideWith?: RectLike[];
-
-  // Ripple
-  amplitude?: number;
-  frequency?: number;
-  speed?: number;
-  decay?: number;
-
-  // Shred
-  strips?: number;
-  twist?: number;
-
-  // Shatter
-  grid?: number;
-  spin?: number;
-
-  // Pixelate
-  pixels?: number;
-  dissolve?: number;
-
-  // Shared tint (0 = source colors, 1 = accent tint)
-  tint?: number;
+  /** Dust is pulled toward this element, rect, or point. */
+  attractTo?: AttractorLike | null;
+  /** How early the pull starts in each particle's life. 0 = late, 1 = early. */
+  attractStrength?: number;
+  /** Sideways curl while being pulled toward the attractor. Negative reverses. */
+  attractSwirl?: number;
 }
 
 export interface EffectHandle {
@@ -77,7 +68,6 @@ export interface EffectFrame {
   capture: HTMLCanvasElement;
   rect: Rect;
   dpr: number;
-  pointer: { x: number; y: number };
   target: HTMLElement;
   options: ResolvedEffectOptions;
 }
@@ -97,7 +87,6 @@ export type ResolvedEffectOptions = Required<
     | "removeTarget"
     | "dpr"
     | "reducedMotion"
-    | "pointer"
     | "burnMs"
     | "density"
     | "gravity"
@@ -111,17 +100,9 @@ export type ResolvedEffectOptions = Required<
     | "collision"
     | "mode"
     | "collideWith"
-    | "amplitude"
-    | "frequency"
-    | "speed"
-    | "decay"
-    | "strips"
-    | "twist"
-    | "grid"
-    | "spin"
-    | "pixels"
-    | "dissolve"
-    | "tint"
+    | "attractTo"
+    | "attractStrength"
+    | "attractSwirl"
   >
 >;
 

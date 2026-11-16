@@ -39,6 +39,7 @@ export function initCopyButtons(): void {
     const code = block?.querySelector<HTMLElement>("code");
     const text = code?.textContent ?? "";
     if (!text) return;
+    const label = button.textContent?.trim() || "Copy";
 
     const ok = await copyText(text);
     announce(ok ? "Copied" : "Copy failed");
@@ -46,7 +47,7 @@ export function initCopyButtons(): void {
 
     button.textContent = "Copied";
     window.setTimeout(() => {
-      button.textContent = "Copy";
+      button.textContent = label;
     }, 1200);
   });
 }

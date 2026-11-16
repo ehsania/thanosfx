@@ -3,21 +3,54 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ThanosFx — WebGL effects for the DOM</title>
+    <title>ThanosFx — WebGL burn and assemble effects for the DOM</title>
     <meta
       name="description"
-      content="A zero-dependency TypeScript library for burning, rippling, shredding, shattering and reassembling DOM elements with WebGL."
+      content="Burn and reassemble real DOM elements with WebGL. Bounce dust off the page, pull it into a target, or let it drift away. Zero runtime dependencies."
     />
     <meta name="theme-color" content="#f5f5f5" />
+    <link rel="canonical" href="https://ehsania.github.io/thanosfx/" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="ThanosFx" />
     <meta
       property="og:description"
-      content="WebGL effects that burn, ripple, shred, shatter and reassemble DOM elements."
+      content="WebGL burn and assemble effects for the DOM, with collision, attraction and dissolve modes."
     />
     <meta property="og:site_name" content="ThanosFx" />
+    <meta property="og:url" content="https://ehsania.github.io/thanosfx/" />
+    <meta
+      property="og:image"
+      content="https://ehsania.github.io/thanosfx/media/three-modes-poster.png"
+    />
+    <meta property="og:image:width" content="1350" />
+    <meta property="og:image:height" content="1080" />
+    <meta
+      property="og:image:alt"
+      content="ThanosFx collision, attract and dissolve modes side by side"
+    />
+    <meta property="og:video" content="https://ehsania.github.io/thanosfx/media/three-modes.mp4" />
+    <meta
+      property="og:video:url"
+      content="https://ehsania.github.io/thanosfx/media/three-modes.mp4"
+    />
+    <meta
+      property="og:video:secure_url"
+      content="https://ehsania.github.io/thanosfx/media/three-modes.mp4"
+    />
+    <meta property="og:video:type" content="video/mp4" />
+    <meta property="og:video:width" content="1350" />
+    <meta property="og:video:height" content="1080" />
     <meta name="twitter:card" content="summary_large_image" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="twitter:title" content="ThanosFx" />
+    <meta
+      name="twitter:description"
+      content="WebGL burn and assemble effects for the DOM, with collision, attraction and dissolve modes."
+    />
+    <meta
+      name="twitter:image"
+      content="https://ehsania.github.io/thanosfx/media/three-modes-poster.png"
+    />
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
     <script>
       (function () {
         var key = "thanosfx-theme";
@@ -44,10 +77,11 @@
         }
       })();
     </script>
-    <link rel="stylesheet" href="/landing/site.css" />
-    <script type="module" src="/landing/main.ts"></script>
+    <link rel="stylesheet" href="./site.css" />
+    <script type="module" src="./main.ts"></script>
   </head>
   <body>
+    <a class="skip-link" href="#main">Skip to content</a>
     <div class="page">
       <header class="site-header">
         <div class="site-header-top">
@@ -76,89 +110,30 @@
             ></button>
           </div>
         </div>
-        <p class="tagline">WebGL effects for the DOM, with nothing to install.</p>
+        <p class="tagline">WebGL burn and assemble effects for the DOM, with nothing to install.</p>
         <p class="reduced-note" data-reduced-note hidden>
           Reduced motion is on — effects use a short opacity fade.
         </p>
       </header>
 
-      <main>
-        <section class="section hero-section" aria-labelledby="hero-title">
-          <div class="hero-copy">
-            <p class="section-kicker">Zero dependencies · WebGL2 · TypeScript</p>
-            <h2 id="hero-title">Make the DOM disappear.</h2>
-            <p class="lede">
-              Capture any element, rasterize it to a texture, and animate it with GPU particles.
-              Burn it, ripple it, shred it, shatter it, pixelate it, or put it back together.
-            </p>
-          </div>
+      <main id="main">
+        <section class="section hero-section" aria-label="Live demo">
           <div id="hero-root"></div>
         </section>
 
-        <section class="section" aria-labelledby="examples-title">
-          <div class="section-head">
-            <p class="section-kicker">Live examples</p>
-            <h2 id="examples-title">Six ways to say goodbye.</h2>
-            <p class="lede">
-              Every card is real DOM. Click it to run the effect, or open the playground to tune the
-              shaders.
-            </p>
-          </div>
-          <div id="bento-root"></div>
+        <section class="section tuner-section" aria-label="Effect tuner">
+          <div id="tuner-root"></div>
         </section>
 
-        <section class="section" aria-labelledby="quickstart-title">
-          <div class="section-head">
-            <p class="section-kicker">Quick start</p>
-            <h2 id="quickstart-title">One element in, dust out.</h2>
+        <section class="section quickstart-section" aria-labelledby="quickstart-title">
+          <div class="quickstart-heading">
+            <h2 id="quickstart-title">Quick Start</h2>
           </div>
-          <div class="install-block">
-            <div class="code-block">
-              <div class="code-head">
-                <span class="code-filename">terminal</span>
-                <button class="copy-button" type="button" data-copy>Copy</button>
-              </div>
-              <pre class="code-body"><code>npm install thanosfx</code></pre>
-            </div>
-            <div class="code-block">
-              <div class="code-head">
-                <span class="code-filename">app.ts</span>
-                <button class="copy-button" type="button" data-copy>Copy</button>
-              </div>
-              <pre class="code-body"><code>import { burn } from "thanosfx";
-
-const card = document.querySelector&lt;HTMLElement&gt;(".card")!;
-
-burn(card, { duration: 1700 }).promise.then(() =&gt; {
-  console.log("gone");
-});</code></pre>
-            </div>
-          </div>
-        </section>
-
-        <section class="section" aria-labelledby="features-title">
-          <div class="section-head">
-            <p class="section-kicker">Why it works</p>
-            <h2 id="features-title">Small on purpose.</h2>
-          </div>
-          <div class="feature-grid">
-            <article class="feature">
-              <h3>One texture, many effects</h3>
-              <p>Every effect shares the same capture, overlay and render loop.</p>
-            </article>
-            <article class="feature">
-              <h3>Real DOM, real pixels</h3>
-              <p>Text, borders, gradients and images are captured as they render.</p>
-            </article>
-            <article class="feature">
-              <h3>Zero runtime dependencies</h3>
-              <p>WebGL2 and the browser do the work. No canvas library required.</p>
-            </article>
-            <article class="feature">
-              <h3>Accessible by default</h3>
-              <p>Reduced motion falls back to a short opacity fade.</p>
-            </article>
-          </div>
+          <p class="quickstart-lede">
+            Copy this prompt into your agent. It will detect your framework and use the right
+            ThanosFx API.
+          </p>
+          <div id="quickstart-root"></div>
         </section>
       </main>
 
@@ -173,5 +148,8 @@ burn(card, { duration: 1700 }).promise.then(() =&gt; {
       </footer>
     </div>
     <div id="live-region" class="sr-only" aria-live="polite"></div>
+    <noscript>
+      <p class="noscript-note">ThanosFx needs JavaScript and WebGL2 to run the live demo.</p>
+    </noscript>
   </body>
 </html>

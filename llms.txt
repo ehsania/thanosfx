@@ -1,0 +1,311 @@
+# ThanosFx
+
+ThanosFx is a zero-dependency WebGL2 library that burns and reassembles real DOM elements. It captures the element as a texture, renders a full-screen overlay, and animates the element with GPU particles. The underlying DOM is left untouched until the effect finishes.
+
+Use it for delete/recycle transitions, destructive actions, and assemble/reveal moments.
+
+## Requirements
+
+- A browser with WebGL2.
+- Client-side JavaScript or TypeScript.
+- The target must be an `HTMLElement` attached to the document and visible when the effect starts.
+- Wait for images and fonts to load before capturing if they are part of the element.
+- The library is DOM-only. It does not render to canvas/WebGL scenes.
+
+## Install
+
+```sh
+npm install thanosfx
+```
+
+React is optional and only needed for the `thanosfx/react` entry point:
+
+```sh
+npm install react
+```
+
+## Import
+
+```ts
+import { assemble, burn, createEffect, effectNames, playEffect } from "thanosfx";
+import type {
+  AttractorLike,
+  EffectHandle,
+  EffectName,
+  EffectOptions,
+  RectLike,
+} from "thanosfx";
+```
+
+## API
+
+### `burn(target, options?)`
+
+Burns the element into dust.
+
+```ts
+const handle = burn(card, {
+  duration: 1700,
+  attractTo: bin,
+  attractStrength: 0.9,
+  attractSwirl: 0.3,
+  collision: false,
+});
+```
+
+### `assemble(target, options?)`
+
+Burn played backwards. Dust gathers and the element appears.
+
+```ts
+assemble(card, {
+  duration: 1800,
+  attractTo: addButton,
+  removeTarget: false,
+});
+```
+
+### `playEffect(target, effect, options?)`
+
+Starts an effect by name: `"burn"` or `"assemble"`.
+
+```ts
+playEffect(card, "burn", { duration: 1200 });
+```
+
+### `createEffect(target, effect, options?)`
+
+Generic form of `playEffect`.
+
+```ts
+createEffect(card, "assemble", { removeTarget: false });
+```
+
+### `effectNames`
+
+`["burn", "assemble"]`
+
+### `EffectHandle`
+
+Every call returns an `EffectHandle`:
+
+```ts
+interface EffectHandle {
+  readonly promise: Promise<void>;
+  cancel(): void;
+}
+```
+
+- `promise` resolves when the effect finishes or is cancelled.
+- `cancel()` stops the animation and restores the target.
+
+## Options
+
+```ts
+interface EffectOptions {
+  duration?: number; // milliseconds
+  removeTarget?: boolean; // burn defaults to true, assemble to false
+  dpr?: number; // device pixel ratio override
+  reducedMotion?: "auto" | "allow" | "reduce";
+  burnMs?: number;
+  density?: number;
+  gravity?: number;
+  bounce?: number;
+  spread?: number;
+  life?: number;
+  friction?: number;
+  lift?: number;
+  particleScale?: number;
+  embers?: boolean;
+  collision?: boolean;
+  mode?: "sweep" | "instant";
+  collideWith?: RectLike[];
+  attractTo?: AttractorLike | null;
+  attractStrength?: number; // 0–1
+  attractSwirl?: number; // negative reverses the curl
+}
+```
+
+Library defaults:
+
+| Option             | Default                 |
+| ------------------ | ----------------------- |
+| `duration`         | `1700` burn, `1800` assemble |
+| `removeTarget`     | `true` burn, `false` assemble |
+| `dpr`              | automatic, capped at 2  |
+| `reducedMotion`    | `"auto"`                |
+| `burnMs`           | `200`                   |
+| `density`          | `0.9`                   |
+| `gravity`          | `3200`                  |
+| `bounce`           | `0.32`                  |
+| `spread`           | `210`                   |
+| `life`             | `1`                     |
+| `friction`         | `0.66`                  |
+| `lift`             | `190`                   |
+| `particleScale`    | `1`                     |
+| `embers`           | `true`                  |
+| `collision`        | `true`                  |
+| `mode`             | `"sweep"`               |
+| `collideWith`      | `[]`                    |
+| `attractTo`        | `null`                  |
+| `attractStrength`  | `0.7`                   |
+| `attractSwirl`     | `0.35`                  |
+
+## Particle modes
+
+### Collision
+
+Dust bounces off the listed elements or rects.
+
+```ts
+const cards = [...document.querySelectorAll<HTMLElement>(".task")];
+const card = cards[0];
+if (!card) throw new Error("Missing task");
+
+await burn(card, {
+  collision: true,
+  collideWith: cards.filter((element) => element !== card),
+}).promise;
+```
+
+### Attract
+
+Dust spirals into an element, rect, or point.
+
+```ts
+const bin = document.querySelector<HTMLElement>(".recycle-bin")!;
+
+await burn(card, {
+  attractTo: bin,
+  attractStrength: 0.9,
+  attractSwirl: 0.3,
+  collision: false,
+}).promise;
+```
+
+`attractTo` accepts:
+
+- an `Element`
+- a `DOMRect`
+- `{ left, top, width, height }`
+- `[x, y, width, height]`
+- `{ x, y }`
+- `[x, y]`
+
+### Dissolve
+
+No collision and no attractor. Dust falls and drifts away.
+
+```ts
+await burn(card, {
+  collision: false,
+  gravity: 450,
+  spread: 240,
+  lift: 210,
+}).promise;
+```
+
+## Recommended cleanup pattern
+
+For delete/recycle flows, keep the element in the layout until the effect finishes:
+
+```ts
+const card = document.querySelector<HTMLElement>(".task")!;
+const bin = document.querySelector<HTMLElement>(".recycle-bin")!;
+
+const handle = burn(card, {
+  attractTo: bin,
+  collision: false,
+  removeTarget: false,
+});
+
+await handle.promise;
+card.remove();
+```
+
+`removeTarget: false` prevents the library from removing the element before your layout logic runs. If a row should keep its space reserved during the effect, leave it in place and remove it after the promise resolves.
+
+For assemble flows, keep `removeTarget: false` so the element remains visible after the dust gathers.
+
+## React
+
+```tsx
+import { useRef } from "react";
+import { useThanosFx } from "thanosfx/react";
+
+export function DeleteCard() {
+  const ref = useRef<HTMLDivElement>(null);
+  const { play, cancel } = useThanosFx(ref, "burn", {
+    attractTo: document.querySelector<HTMLElement>(".recycle-bin"),
+    collision: false,
+    removeTarget: false,
+  });
+
+  return (
+    <div ref={ref}>
+      <button onClick={() => void play()?.promise.then(() => ref.current?.remove())}>
+        Delete
+      </button>
+      <button onClick={cancel}>Cancel</button>
+    </div>
+  );
+}
+```
+
+`useThanosFx(ref, effect, options)` returns:
+
+```ts
+{
+  play(): EffectHandle | null;
+  cancel(): void;
+}
+```
+
+The `ThanosFx` component is also available:
+
+```tsx
+import { ThanosFx } from "thanosfx/react";
+
+<ThanosFx effect="burn" options={{ duration: 1700 }} autoPlay>
+  <div className="card">Delete me</div>
+</ThanosFx>;
+```
+
+## Reduced motion and WebGL2
+
+- `reducedMotion: "auto"` honors `prefers-reduced-motion`.
+- `"reduce"` forces the short opacity fallback.
+- `"allow"` forces the full particle effect.
+- If WebGL2 is unavailable, the effect cannot run. Let the promise reject or fall back to your own fade.
+
+## Troubleshooting
+
+**Nothing happens**
+
+- Check that the target is an `HTMLElement` in the document.
+- Check that the target has a non-zero size.
+- Check that WebGL2 is available.
+- Make sure the element is not `display: none` or `visibility: hidden`.
+
+**Images are missing from the effect**
+
+- Wait for images to decode before starting.
+- Cross-origin images can prevent canvas capture. Use same-origin images or data URLs.
+- If an optional global `html2canvas` is present, ThanosFx uses it; otherwise it uses an SVG `foreignObject` snapshot.
+
+**The layout jumps**
+
+- Use `removeTarget: false`.
+- Keep the element in place until `handle.promise` resolves.
+- Remove the element yourself after the effect.
+
+**The target disappears immediately**
+
+- Check the `removeTarget` option.
+- Check whether `cancel()` was called.
+
+## Links
+
+- Live demo: https://ehsania.github.io/thanosfx/
+- Repository: https://github.com/ehsania/thanosfx
+- npm: https://www.npmjs.com/package/thanosfx
